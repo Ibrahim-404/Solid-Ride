@@ -11,6 +11,13 @@ Feature: Driver Dispatch Push & High-Priority Audio Alerts
    the driver via high-priority push notification and plays an attention-grabbing
    audio siren or chime so they do not miss the acceptance countdown window (15s).
 
+   EXECUTION FLOW (DIRECT VENDOR COUPLING):
+   [DispatchAlertCoordinator] (High-Level Escalation Policy)
+         │ (Directly coupled to Google FCM & local audio plugins)
+         ├── new FirebaseCloudMessagingPlugin()
+         └── new FlutterLocalNotificationsPlugin()
+   (Crashes on Huawei devices without Google Play Services; untestable!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    The coordinator class `DispatchAlertCoordinator` instantiates `FirebaseCloudMessagingPlugin`
    and `FlutterLocalNotificationsPlugin` directly. It's concise and follows standard

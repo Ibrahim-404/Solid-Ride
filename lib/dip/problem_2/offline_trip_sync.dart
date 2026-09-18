@@ -12,6 +12,13 @@ Feature: Offline Trip Queue & Persistence Synchronization
    trips locally, and when connectivity is restored, synchronizes pending trips with
    the dispatch cloud servers.
 
+   EXECUTION FLOW (DIRECT STORAGE COUPLING):
+   [OfflineTripSyncCoordinator] (High-Level Sync Policy)
+         │ (Directly coupled to concrete storage & network)
+         ├── SqfliteLocalDatabase.instance (Raw SQL queries)
+         └── DioHttpClient() (Raw HTTP calls)
+   (Migrating SQLite to Hive requires rewriting the entire sync policy!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    The class `OfflineTripSyncCoordinator` directly accesses `SqfliteLocalDatabase.instance`
    and creates a `DioHttpClient()` to upload the trips. It looks pragmatic and avoids

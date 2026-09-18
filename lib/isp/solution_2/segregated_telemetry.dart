@@ -14,6 +14,13 @@ Feature: Driver Device Hardware Telemetry & Sensor Suite (Refactored)
    - `TaximeterIntegration`: Dedicated to physical Bluetooth taximeter synchronization.
    - `EmergencySosService`: Dedicated to panic/distress signals.
 
+   REFACTORED SEGREGATED FLOW:
+   Segregated Interfaces:
+      ├── [LocationProvider]     ── used by ──> DriverMapWidget (Clean & focused)
+      ├── [BatteryMonitor]       ── used by ──> BatteryStatusBanner
+      └── [TaximeterIntegration] ── used by ──> BluetoothMeterSyncService
+   (Map widget depends ONLY on LocationProvider. Zero hardware coupling!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 2:
    - `DriverMapTrackingWidget` depends strictly on `LocationProvider`.
    - The map widget has zero visibility into or coupling with Bluetooth hardware, crash

@@ -15,6 +15,16 @@ Feature: Live Trip Tracking & Geolocation Publisher (Refactored)
    - Concrete plugins (`DeviceGpsLocationSource`, `FirebaseLocationPublisher`, `MqttLocationPublisher`)
      now depend on and implement these abstractions.
 
+   REFACTORED INVERTED FLOW:
+   [DriverLiveTrackingUseCase] (High-Level Business Logic)
+         │ (Depends strictly on domain abstractions)
+         ▼
+   [LocationStreamSource]           [LiveLocationPublisher]
+         ▲                                    ▲
+         │ (implemented by)                   │ (implemented by)
+   [DeviceGpsLocationSource]        [FirebasePublisher] / [MqttPublisher]
+   (High-level policy is decoupled from low-level plugins!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 1:
    - Unit testing `DriverLiveTrackingUseCase` is 100% independent of hardware and networks:
      simply inject a `MockLocationStreamSource` emitting test coordinates.

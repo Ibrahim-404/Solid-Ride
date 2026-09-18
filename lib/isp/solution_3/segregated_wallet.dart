@@ -14,6 +14,12 @@ Feature: Driver Wallet & Financial Management Operations (Refactored)
    - `DisputeService`: Dispute filing workflows.
    - The read-only header widget depends ONLY on `WalletBalanceReader`.
 
+   REFACTORED SEGREGATED FLOW (CQS):
+   Segregated Contracts:
+      ├── [WalletBalanceReader]   ── used by ──> DriverHeaderBalanceWidget (Read-only display)
+      └── [CashoutCommandService] ── used by ──> CashoutModalDialog (Secure money mutation)
+   (Presentation widget physically cannot trigger money transfers!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 3:
    - Principle of Least Privilege: `CleanDriverHeaderBalanceWidget` cannot physically call
      cashout or bank account modification methods because they do not exist on its contract.

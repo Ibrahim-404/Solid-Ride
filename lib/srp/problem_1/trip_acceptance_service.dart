@@ -11,7 +11,17 @@ Feature: Trip Dispatch & Driver Order Acceptance (Ride-Hailing / Delivery)
    screen, this class processes the acceptance: it updates the trip status in the
    local SQLite database, sends an HTTP request to the dispatch backend, calculates
    the driver's dynamic surge payout and platform commission, emits an analytics event
-   to Firebase, and triggers device haptic feedback and an audio chime.
+
+   EXECUTION FLOW (MONOLITHIC):
+   Driver presses "Accept"
+           ↓
+   [TripAcceptanceService] (One Monolithic Class)
+      ├── 1. SQLite: Saves trip state
+      ├── 2. HTTP POST: Notifies backend dispatch
+      ├── 3. Math: Calculates surge & commission
+      ├── 4. Analytics: Logs Firebase event
+      └── 5. Hardware: Plays chime & triggers haptic
+   (5 reasons to change - fragile, coupled, and error-prone!)
 
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    It keeps everything related to "accepting a trip" in one convenient place. Any

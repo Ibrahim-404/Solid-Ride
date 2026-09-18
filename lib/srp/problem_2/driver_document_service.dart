@@ -15,6 +15,17 @@ Feature: Driver Document Verification & Onboarding (License & Vehicle ID)
    in jurisdiction), uploads the compressed photo to an AWS S3 cloud bucket, and updates
    the driver's profile status in the database.
 
+   EXECUTION FLOW (MONOLITHIC):
+   Driver uploads Document Photo
+           ↓
+   [DriverDocumentService] (All-in-One Class)
+      ├── 1. Image Compression (Resizes raw bytes)
+      ├── 2. OCR Engine (Extracts ID & expiry dates)
+      ├── 3. Compliance Rules (Rejects if < 30 days valid)
+      ├── 4. Cloud Storage (Uploads bytes to AWS S3)
+      └── 5. Database Profile (Marks status = VERIFIED)
+   (4 distinct reasons to change - fragile and un-testable in isolation)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    To many developers, this is simply "the document verification service". Everything
    inside it is related to processing a driver's document from the camera capture.

@@ -15,6 +15,16 @@ Feature: Driver Dispatch Push & High-Priority Audio Alerts (Refactored)
    - Concrete implementations (`FirebasePushGateway`, `HuaweiPushGateway`,
      `NativeDeviceAudioGateway`) implement these contracts.
 
+   REFACTORED INVERTED GATEWAY FLOW:
+   [DispatchAlertCoordinator] (High-Level Escalation Policy)
+         │ (Depends strictly on domain abstractions)
+         ▼
+   [PushNotificationGateway]        [UrgentSoundAlertGateway]
+         ▲                                    ▲
+         │ (implemented by)                   │ (implemented by)
+   [FirebasePush] / [HuaweiPush]    [NativeDeviceAudioGateway]
+   (Multi-store support: Google Play vs Huawei works seamlessly!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 3:
    - Running in regions without Google Play Services (e.g. Huawei AppGallery) is solved
      by passing `HuaweiPushGateway`. The coordinator doesn't change a single line.

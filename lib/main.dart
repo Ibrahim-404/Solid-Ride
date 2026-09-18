@@ -39,7 +39,7 @@ class SolidPrinciplesDemoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SOLID Principles in Flutter',
+      title: 'SOLID Principles Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -86,10 +86,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'Monolithic TripAcceptanceService handled local SQLite DB, backend HTTP API, surge payout math, Firebase analytics, and phone audio/vibrations in one 90-line class.',
           problemBreaks:
               'Changing finance commission rules or switching analytics from Firebase to Mixpanel forces modifying core trip dispatch code, risking high-frequency regressions.',
+          problemFlow: '''Driver presses "Accept"
+        ↓
+[TripAcceptanceService] (One Monolithic Class)
+   ├── 1. SQLite: Saves trip state
+   ├── 2. HTTP POST: Notifies backend dispatch
+   ├── 3. Math: Calculates surge & commission
+   ├── 4. Analytics: Logs Firebase event
+   └── 5. Hardware: Plays chime & triggers haptic
+(5 reasons to change - fragile & risky!)''',
           solutionSummary:
               'Separated into TripRepository, TripPayoutCalculator, TripAnalyticsTracker, and TripAlertService, orchestrated cleanly by AcceptTripUseCase.',
           solutionFixes:
               'Finance rules, analytics vendors, and audio chimes are each 100% isolated. Zero merge conflicts and pure, millisecond unit testing for financial formulas.',
+          solutionFlow: '''Driver presses "Accept"
+        ↓
+[AcceptTripUseCase] (Orchestrator)
+   ├── 1. [TripPayoutCalculator] ──> Calculates net payout
+   ├── 2. [TripRepository]       ──> SQLite + Backend API
+   ├── 3. [TripAnalyticsTracker] ──> Emits analytics event
+   └── 4. [TripAlertService]     ──> Plays sound & haptics
+(Each class has 1 reason to change; 100% testable)''',
           onRunSolution: () async {
             final repo = srp1.TripRepository();
             final calc = srp1.TripPayoutCalculator();
@@ -123,10 +140,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'DriverDocumentService handled image byte compression, OCR text extraction, AWS S3 upload, and license expiration validation rules all together.',
           problemBreaks:
               'Tuning compression quality, switching from AWS to Cloudflare R2, or updating legal expiry thresholds required touching the same monolithic file.',
+          problemFlow: '''Driver uploads Document Photo
+        ↓
+[DriverDocumentService] (All-in-One Class)
+   ├── 1. Image Compression (Resizes raw bytes)
+   ├── 2. OCR Engine (Extracts ID & expiry dates)
+   ├── 3. Compliance Rules (Rejects if < 30 days valid)
+   ├── 4. Cloud Storage (Uploads bytes to AWS S3)
+   └── 5. Database Profile (Marks status = VERIFIED)''',
           solutionSummary:
               'Decomposed into DocumentImageCompressor, DocumentOcrParser, DocumentComplianceValidator, DocumentCloudStorage, and DriverProfileRepository.',
           solutionFixes:
               'Legal compliance validation rules can now be tested in unit tests with zero mocking of camera bytes or cloud credentials.',
+          solutionFlow: '''Driver uploads Document Photo
+        ↓
+[DriverDocumentProcessor] (Pipeline Orchestrator)
+   ├── 1. [DocumentImageCompressor]     ──> WebP optimization
+   ├── 2. [DocumentOcrParser]           ──> OCR text extraction
+   ├── 3. [DocumentComplianceValidator] ──> Expiry rule checks
+   ├── 4. [DocumentCloudStorage]        ──> S3 / GCS upload
+   └── 5. [DriverProfileRepository]     ──> Updates database''',
           onRunSolution: () async {
             final processor = srp2.DriverDocumentProcessor(
               compressor: srp2.DocumentImageCompressor(),
@@ -153,10 +186,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'ShiftEarningsReporter computed net accounting math, formatted localized text, built CSV files, and sent email receipts in one method.',
           problemBreaks:
               'Changing tax withholding or adding multi-currency (EGP/SAR) formatting risked breaking accounting calculations or CSV export syntax.',
+          problemFlow: '''Driver finishes shift
+        ↓
+[ShiftEarningsReporter] (One Class)
+   ├── 1. Accounting: Deducts commission & sums tips
+   ├── 2. Localization: Formats currency (\$/EGP) & dates
+   ├── 3. Exporter: Formats raw CSV text
+   └── 4. Messenger: Sends email/SMS receipt''',
           solutionSummary:
               'Segregated into ShiftEarningsCalculator, EarningsReportFormatter, EarningsCsvExporter, and EarningsReceiptSender.',
           solutionFixes:
               'Accounting arithmetic is decoupled from string formatting and communication transports.',
+          solutionFlow: '''Driver finishes shift
+        ↓
+[GenerateShiftReportUseCase]
+   ├── 1. [ShiftEarningsCalculator] ──> Pure financial arithmetic
+   ├── 2. [EarningsReportFormatter] ──> UI localization & formatting
+   ├── 3. [EarningsCsvExporter]     ──> Generates export file
+   └── 4. [EarningsReceiptSender]   ──> Dispatches email/SMS''',
           onRunSolution: () async {
             final useCase = srp3.GenerateShiftReportUseCase(
               calculator: srp3.ShiftEarningsCalculator(),
@@ -193,10 +240,30 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'PayoutProcessor used a rigid switch statement for Bank Transfer, Debit Card, and Mobile Wallet with hardcoded fees and network calls.',
           problemBreaks:
               'Adding InstaPay or M-Pesa required modifying existing switch cases, risking breaking bank transfer fee math and causing merge conflicts.',
+          problemFlow: '''Driver requests cashout
+        ↓
+[PayoutProcessor]
+        ↓
+   switch (method) {
+      case Bank:   ──> [Hardcoded Bank Logic]
+      case Card:   ──> [Hardcoded Card Logic]
+      case Wallet: ──> [Hardcoded Wallet Logic]
+   }
+(Adding InstaPay = Modifying & risking all existing cases!)''',
           solutionSummary:
               'Polymorphic PayoutGateway interface with self-contained gateway classes (BankTransfer, InstantCard, MobileWallet, InstaPay).',
           solutionFixes:
               'New payout methods are added simply by creating a new class. PayoutService is 100% closed for modification.',
+          solutionFlow: '''Driver requests cashout
+        ↓
+[PayoutService] (CLOSED for modification)
+        ↓ delegates to
+[PayoutGateway] (OPEN for extension)
+      ▲
+      ├── [BankTransferPayoutGateway]
+      ├── [InstantCardPayoutGateway]
+      ├── [MobileWalletPayoutGateway]
+      └── [InstaPayPayoutGateway] (Added with ZERO edits!)''',
           onRunSolution: () async {
             final service = ocp1.PayoutService();
             final gateway = ocp1.InstaPayPayoutGateway();
@@ -218,10 +285,30 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'FareCalculator branched over VehicleCategory with hardcoded base fares, per-km rates, and minimum fees in one function.',
           problemBreaks:
               'Adding Electric Scooter or Cargo Van required editing the existing calculator and risked fat-fingering rates for passenger cars.',
+          problemFlow: '''Calculate trip fare
+        ↓
+[TripFareCalculator]
+        ↓
+   switch (vehicleCategory) {
+      case Economy:    ──> [Hardcoded Economy pricing]
+      case Comfort:    ──> [Hardcoded Comfort pricing]
+      case Motorcycle: ──> [Hardcoded Courier pricing]
+   }
+(Adding Electric Scooter = Modifying core calculator)''',
           solutionSummary:
               'Strategy Pattern: VehicleFareStrategy interface with dedicated strategies for Economy, Comfort, Motorcycle, and ElectricScooter.',
           solutionFixes:
               'Each vehicle tier encapsulates its own rates and minimum thresholds. Adding tiers touches zero existing lines.',
+          solutionFlow: '''Calculate trip fare
+        ↓
+[FareCalculationService] (CLOSED for modification)
+        ↓ executes
+[VehicleFareStrategy] (OPEN for extension)
+      ▲
+      ├── [EconomyFareStrategy]
+      ├── [ComfortFareStrategy]
+      ├── [MotorcycleFareStrategy]
+      └── [ElectricScooterFareStrategy] (Added with 0 edits!)''',
           onRunSolution: () async {
             final service = ocp2.FareCalculationService();
             final scooterStrategy = ocp2.ElectricScooterFareStrategy();
@@ -241,10 +328,28 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'OrderMatchingEngine chained if conditions for Cash-on-Delivery, driver ratings, package weight, and high-value insurance.',
           problemBreaks:
               'Adding Low-Emission Zone rules or VIP driver requirements meant continually bloating the engine with more nested conditions.',
+          problemFlow: '''Incoming order offer
+        ↓
+[OrderMatchingEngine]
+   ├── if (!driver.hasCash && order.isCash) return false;
+   ├── if (driver.rating < order.minRating) return false;
+   ├── if (order.weight > driver.maxWeight) return false;
+   └── if (order.isHighValue && !driver.insured) return false;
+(Adding Low Emission rule = Bloating engine method)''',
           solutionSummary:
               'Specification / Rule Pipeline: OrderMatchingRule interface with modular rules executed sequentially by OrderMatchingPipeline.',
           solutionFixes:
               'New operational or municipal constraints are added as standalone rules without editing the matching engine.',
+          solutionFlow: '''Incoming order offer
+        ↓
+[OrderMatchingPipeline] (CLOSED for modification)
+        ↓ evaluates rule set
+[OrderMatchingRule] (OPEN for extension)
+      ▲
+      ├── [CashOnDeliveryRule]
+      ├── [RatingThresholdRule]
+      ├── [WeightCapacityRule]
+      └── [LowEmissionZoneRule] (Plug in new rule effortlessly)''',
           onRunSolution: () async {
             final pipeline = ocp3.OrderMatchingPipeline([
               ocp3.CashOnDeliveryRule(),
@@ -291,10 +396,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'Base Vehicle class declared turnOnAirConditioning() and lockDoors(). BicycleCourier inherited it and threw UnsupportedError at runtime.',
           problemBreaks:
               'The passenger dispatch loop crashed with unhandled exceptions when preparing rides, forcing developers to write dirty type checks.',
+          problemFlow: '''Passenger Dispatch Coordinator
+        ↓
+Loops through: List<Vehicle>
+   ├── Car  ──> vehicle.turnOnAirConditioning() ──> OK
+   └── Bike ──> vehicle.turnOnAirConditioning() ──> CRASH!
+(UnsupportedError: Bicycles have no AC or doors!)''',
           solutionSummary:
               'Sound hierarchy: Vehicle (general), PassengerVehicle (climate control, doors, seats), and CargoCourierVehicle (cargo volume).',
           solutionFixes:
               'PassengerDispatchCoordinator strictly accepts PassengerVehicle. Any subtype (Sedan, Luxury SUV) is 100% substitutable with zero crashes.',
+          solutionFlow: '''Passenger Dispatch Coordinator
+        ↓
+Accepts ONLY: List<PassengerVehicle>
+   ├── SedanCar  ──> car.turnOnClimateControl() ──> OK
+   └── LuxurySuv ──> car.turnOnClimateControl() ──> OK
+(BicycleCourier inherits from CargoCourierVehicle; 100% safe)''',
           onRunSolution: () async {
             final coordinator = lsp1.PassengerDispatchCoordinator();
             final fleet = <lsp1.PassengerVehicle>[
@@ -320,10 +437,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'Subclass NonCancellableGovPromoPolicy threw unexpected StateError inside calculateCancellationFee, crashing the UI cancellation sheet.',
           problemBreaks:
               'Callers expected a safe non-negative fee query. The subclass violated preconditions and postconditions, crashing the active trip session.',
+          problemFlow: '''Rider / Driver cancels trip
+        ↓
+[CancellationCoordinator]
+        ↓
+policy.calculateCancellationFee()
+   ├── StandardPolicy ──> Returns \$5.00
+   └── GovPromoPolicy ──> CRASH! Throws StateError
+(Subtype breaks contract by throwing surprise error!)''',
           solutionSummary:
               'CancellationResult result object encapsulating isPermitted, feeCharged, and user explanation without throwing exceptions.',
           solutionFixes:
               'All cancellation policy subtypes honor the base contract. The UI handles non-cancellable promos gracefully without try/catch guards.',
+          solutionFlow: '''Rider / Driver cancels trip
+        ↓
+[SafeCancellationCoordinator]
+        ↓
+policy.evaluateCancellation()
+   ├── StandardPolicy ──> CancellationResult.allowed(fee: \$5.00)
+   └── GovPromoPolicy ──> CancellationResult.denied(reason: "Contact Support")
+(All subtypes return safe result; zero unexpected crashes)''',
           onRunSolution: () async {
             final coordinator = lsp2.SafeCancellationCoordinator(
               lsp2.GovSubsidizedCancellationPolicy(),
@@ -345,10 +478,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'PedestrianCourierRouter threw UnsupportedError on highway destinations and returned empty turn directions, crashing the HUD widget.',
           problemBreaks:
               'The turn-by-turn widget crashed reading route.turnDirections.first, forcing developers to write "if (router is PedestrianRouter)".',
+          problemFlow: '''Turn-by-turn Navigation HUD
+        ↓
+router.calculateRoute()
+   ├── CarRouter        ──> Returns route with turn maneuvers
+   └── PedestrianRouter ──> Throws UnsupportedError OR returns []
+                            └──> CRASH on route.turnDirections.first''',
           solutionSummary:
               'NavigationRouter returns RouteResult guaranteeing non-empty maneuvers on success, and clean domain failures for infeasible routes.',
           solutionFixes:
               'Car, Motorcycle, and Walking routers are 100% substitutable. The HUD controller operates without type-checking or crashing.',
+          solutionFlow: '''Turn-by-turn Navigation HUD
+        ↓
+router.calculateRoute()
+   ├── CarRouter        ──> RouteResult.success(routeWithSteps)
+   ├── MotorbikeRouter  ──> RouteResult.success(routeWithShortcuts)
+   └── PedestrianRouter ──> RouteResult.failure("Exceeds walking distance")
+(HUD handles all routers uniformly without type checks)''',
           onRunSolution: () async {
             final controller = lsp3.SafeNavigationHudController(
               lsp3.MotorcycleNavigationRouter(),
@@ -377,10 +523,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'Giant DriverTripEventListener forced food delivery widgets to implement empty or throwing stubs for passenger boarding and toll payments.',
           problemBreaks:
               'Adding a new method like onChildSeatInspected() broke every food courier listener in the app and caused build failures.',
+          problemFlow: '''[DriverTripEventListener] (FAT Interface: 7 methods)
+      ▲
+      ├── FoodDeliveryWidget (Only needs foodPickedUp & signature)
+      │     ├── onFoodPickedUp() ──────────> Uses this
+      │     ├── onPassengerBoarded() ──────> Forced empty stub / error!
+      │     ├── onLuggageLoaded() ─────────> Forced empty stub / error!
+      │     └── onTollPaid() ──────────────> Forced empty stub!
+(Adding onChildSeat() breaks all food widgets in the app!)''',
           solutionSummary:
               'Segregated into TripOfferListener, PassengerRideListener, FoodDeliveryListener, and TollExpenseListener.',
           solutionFixes:
               'CleanFoodDeliveryTrackingWidget implements ONLY FoodDeliveryListener. Zero boilerplate stubs, zero broken builds when taxi listeners change.',
+          solutionFlow: '''Role-Specific Segregated Interfaces:
+   ├── [PassengerRideListener]  ── implemented by ──> TaxiRideScreen
+   ├── [FoodDeliveryListener]   ── implemented by ──> FoodDeliveryWidget
+   └── [TollExpenseListener]    ── implemented by ──> TollPaymentCard
+(Food widget implements ONLY what it needs. Zero dummy stubs!)''',
           onRunSolution: () async {
             final foodWidget = isp1.CleanFoodDeliveryTrackingWidget('ORD-555');
             foodWidget.onFoodPackagePickedUp('ORD-555', 'Burger King Zamalek');
@@ -395,10 +554,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'DriverDeviceTelemetry combined GPS, battery, accelerometer, and Bluetooth meters. Map widget had to depend on the entire sensor suite.',
           problemBreaks:
               'Testing the map required mocking Bluetooth taximeters and crash sensors. Hardware protocol changes forced re-testing UI screens.',
+          problemFlow: '''[DriverDeviceTelemetry] (GPS + Battery + Crash Sensors + Bluetooth Taximeter)
+      ▲
+      └── DriverMapWidget (Only needs GPS location to move pin!)
+            (Coupled to taximeters & crash sensors; hard to test)''',
           solutionSummary:
               'Segregated into LocationProvider, BatteryMonitor, CrashDetectionSensor, and TaximeterIntegration.',
           solutionFixes:
               'Map widget depends strictly on LocationProvider. Widget tests take 3 lines to mock with zero hardware coupling.',
+          solutionFlow: '''Segregated Interfaces:
+   ├── [LocationProvider]     ── used by ──> DriverMapWidget (Clean & focused)
+   ├── [BatteryMonitor]       ── used by ──> BatteryStatusBanner
+   └── [TaximeterIntegration] ── used by ──> BluetoothMeterSyncService''',
           onRunSolution: () async {
             final hardware = isp2.PhoneHardwareManager();
             final mapWidget = isp2.CleanDriverMapTrackingWidget(hardware);
@@ -413,10 +580,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'DriverWalletManager gave read-only balance header widget access to executeInstantCashout() and linkBankAccount().',
           problemBreaks:
               'Principle of Least Privilege violated: a presentation header had full capability to trigger real financial wire transfers.',
+          problemFlow: '''[DriverWalletManager] (Balance Query + Instant Cashout + Link Bank Account)
+      ▲
+      └── DriverHeaderBalanceWidget (Display ONLY)
+            (Security risk: simple UI display can trigger cashouts!)''',
           solutionSummary:
               'Separated into WalletBalanceReader (queries) and CashoutCommandService / BankAccountService (mutating commands).',
           solutionFixes:
               'Header widget only accepts WalletBalanceReader. Impossible for accidental UI clicks to initiate money transfers.',
+          solutionFlow: '''Segregated Contracts (Command-Query Segregation):
+   ├── [WalletBalanceReader]   ── used by ──> DriverHeaderBalanceWidget (Read-only)
+   └── [CashoutCommandService] ── used by ──> CashoutModalDialog (Secure mutation)''',
           onRunSolution: () async {
             final repo = isp3.DriverWalletRepository();
             final header = isp3.CleanDriverHeaderBalanceWidget(repo);
@@ -441,10 +615,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'DriverLiveTrackingUseCase instantiated concrete GeolocatorPlugin and FirebaseRealtimeDatabase inside its constructor.',
           problemBreaks:
               'Business tracking logic could not be unit tested without native GPS hardware and live Firebase servers. Migrating to MQTT was blocked.',
+          problemFlow: '''[DriverLiveTrackingUseCase] (High-Level Business Logic)
+      │ (Directly instantiates concrete low-level SDKs)
+      ├── new GeolocatorDevicePlugin()
+      └── new FirebaseRealtimeDatabase()
+(Cannot unit test without hardware & cloud; locked to Firebase)''',
           solutionSummary:
               'Use case depends on LocationStreamSource and LiveLocationPublisher abstractions. Concrete adapters are injected.',
           solutionFixes:
               'Unit testing takes 5ms with fake stream sources. Switching to MQTT or Supabase requires 1 new adapter with zero use case changes.',
+          solutionFlow: '''[DriverLiveTrackingUseCase] (High-Level Business Logic)
+      │ (Depends strictly on domain abstractions)
+      ▼
+[LocationStreamSource]           [LiveLocationPublisher]
+      ▲                                    ▲
+      │ (implemented by)                   │ (implemented by)
+[DeviceGpsLocationSource]        [FirebasePublisher] / [MqttPublisher]''',
           onRunSolution: () async {
             final useCase = dip1.DriverLiveTrackingUseCase(
               driverId: 'DRV-404',
@@ -462,10 +648,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'OfflineTripSyncCoordinator directly imported and called SqfliteDatabase.instance and DioHttpClient in its sync method.',
           problemBreaks:
               'Sync policy was tightly bound to raw SQL strings and Dio headers. Upgrading SQLite to Hive or Isar required rewriting sync logic.',
+          problemFlow: '''[OfflineTripSyncCoordinator] (High-Level Sync Policy)
+      │ (Directly coupled to concrete storage & network)
+      ├── SqfliteLocalDatabase.instance (Raw SQL queries)
+      └── DioHttpClient() (Raw HTTP calls)
+(Migrating SQLite to Hive requires rewriting the entire sync policy!)''',
           solutionSummary:
               'Coordinator depends on OfflineTripQueue and RemoteTripSyncGateway interfaces. Storage and HTTP clients are decoupled adapters.',
           solutionFixes:
               'Sync retry rules, batching, and error policies are completely storage-agnostic and unit-testable in pure Dart.',
+          solutionFlow: '''[OfflineTripSyncCoordinator] (High-Level Sync Policy)
+      │ (Depends strictly on abstractions)
+      ▼
+[OfflineTripQueue]               [RemoteTripSyncGateway]
+      ▲                                    ▲
+      │ (implemented by)                   │ (implemented by)
+[SqfliteAdapter] / [HiveAdapter]     [HttpTripSyncGateway]''',
           onRunSolution: () async {
             final coordinator = dip2.OfflineTripSyncCoordinator(
               queue: dip2.SqfliteTripQueueAdapter(),
@@ -482,10 +680,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               'DispatchAlertCoordinator directly instantiated FirebaseCloudMessagingPlugin and FlutterLocalNotificationsPlugin.',
           problemBreaks:
               'Crashed on devices lacking Google Play Services (Huawei devices, dedicated POS terminals). High-level escalation was untestable.',
+          problemFlow: '''[DispatchAlertCoordinator] (High-Level Escalation Policy)
+      │ (Directly coupled to Google FCM & local audio plugins)
+      ├── new FirebaseCloudMessagingPlugin()
+      └── new FlutterLocalNotificationsPlugin()
+(Crashes on Huawei devices without Google Play Services; untestable)''',
           solutionSummary:
               'Coordinator depends on PushNotificationGateway and UrgentSoundAlertGateway. Firebase, Huawei, and Mock gateways implement them.',
           solutionFixes:
               'Multi-store deployment (Google Play vs Huawei AppGallery) works out-of-the-box by injecting the appropriate gateway.',
+          solutionFlow: '''[DispatchAlertCoordinator] (High-Level Escalation Policy)
+      │ (Depends strictly on abstractions)
+      ▼
+[PushNotificationGateway]        [UrgentSoundAlertGateway]
+      ▲                                    ▲
+      │ (implemented by)                   │ (implemented by)
+[FirebasePush] / [HuaweiPush]    [NativeDeviceAudioGateway]''',
           onRunSolution: () async {
             final coordinator = dip3.DispatchAlertCoordinator(
               pushGateway: dip3.HuaweiPushKitGateway(),
@@ -579,8 +789,10 @@ class PairScenario {
   final String context;
   final String problemSummary;
   final String problemBreaks;
+  final String problemFlow;
   final String solutionSummary;
   final String solutionFixes;
+  final String solutionFlow;
   final Future<String> Function() onRunSolution;
 
   PairScenario({
@@ -588,8 +800,10 @@ class PairScenario {
     required this.context,
     required this.problemSummary,
     required this.problemBreaks,
+    required this.problemFlow,
     required this.solutionSummary,
     required this.solutionFixes,
+    required this.solutionFlow,
     required this.onRunSolution,
   });
 }
@@ -650,7 +864,7 @@ class PrincipleView extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Explore 3 realistic driver-app scenarios below comparing common mistakes with clean architecture solutions.',
+                  'Explore 3 realistic driver-app scenarios below with interactive execution and visual architecture flows.',
                   style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
                 ),
               ],
@@ -769,6 +983,7 @@ class _ScenarioCardState extends State<ScenarioCard> {
               ),
             ),
             const SizedBox(height: 10),
+            // Problem Container
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -791,6 +1006,30 @@ class _ScenarioCardState extends State<ScenarioCard> {
                   ),
                   const SizedBox(height: 4),
                   Text(widget.pair.problemSummary, style: const TextStyle(fontSize: 12)),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '⚡ Problem Execution Flow:',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.red),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.pair.problemFlow,
+                          style: const TextStyle(fontSize: 11, fontFamily: 'monospace', height: 1.3),
+                        ),
+                      ],
+                    ),
+                  ),
                   if (_isExpanded) ...[
                     const SizedBox(height: 6),
                     Text(
@@ -802,6 +1041,7 @@ class _ScenarioCardState extends State<ScenarioCard> {
               ),
             ),
             const SizedBox(height: 8),
+            // Solution Container
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -824,6 +1064,30 @@ class _ScenarioCardState extends State<ScenarioCard> {
                   ),
                   const SizedBox(height: 4),
                   Text(widget.pair.solutionSummary, style: const TextStyle(fontSize: 12)),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '✨ Decoupled Solution Flow:',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.pair.solutionFlow,
+                          style: const TextStyle(fontSize: 11, fontFamily: 'monospace', height: 1.3),
+                        ),
+                      ],
+                    ),
+                  ),
                   if (_isExpanded) ...[
                     const SizedBox(height: 6),
                     Text(

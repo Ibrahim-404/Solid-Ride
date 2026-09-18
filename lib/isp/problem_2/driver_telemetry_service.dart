@@ -12,6 +12,12 @@ Feature: Driver Device Hardware Telemetry & Sensor Suite
    impact/crash detection, Bluetooth taximeter synchronization, and hardware
    emergency SOS beacon triggering.
 
+   EXECUTION FLOW (HARDWARE COUPLING):
+   [DriverDeviceTelemetry] (GPS + Battery + Crash Sensors + Bluetooth Taximeter)
+         ▲
+         └── DriverMapWidget (Only needs GPS location to move pin!)
+               (Coupled to taximeters & crash sensors; hard to mock and test!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    "It's all device hardware and telemetry." Packaging all phone sensor features
    into a single interface `DriverDeviceTelemetry` seems clean and centralized.

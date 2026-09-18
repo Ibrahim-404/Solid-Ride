@@ -15,6 +15,16 @@ Feature: Offline Trip Queue & Persistence Synchronization (Refactored)
    - Low-level database adapters (`SqfliteTripQueueAdapter`, `HiveTripQueueAdapter`)
      and network gateways implement these contracts.
 
+   REFACTORED INVERTED REPOSITORY FLOW:
+   [OfflineTripSyncCoordinator] (High-Level Sync Policy)
+         │ (Depends strictly on domain abstractions)
+         ▼
+   [OfflineTripQueue]               [RemoteTripSyncGateway]
+         ▲                                    ▲
+         │ (implemented by)                   │ (implemented by)
+   [SqfliteAdapter] / [HiveAdapter]     [HttpTripSyncGateway]
+   (Database engine can be swapped with ZERO changes to sync logic!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 2:
    - The sync policy has zero references to SQL statements or HTTP headers.
    - Switching from SQLite to Hive or Isar means adding a new adapter class; the

@@ -16,6 +16,15 @@ Feature: Turn-by-Turn Navigation Routing Engines (Refactored)
      infeasible, it returns a failed `RouteResult` instead of crashing with `UnsupportedError`.
    - When successful, it provides valid walking maneuvers rather than empty lists.
 
+   REFACTORED UNIFORM ROUTING FLOW:
+   Turn-by-turn Navigation HUD
+           ↓
+   router.calculateRoute()
+      ├── CarRouter        ──> RouteResult.success(routeWithSteps)
+      ├── MotorbikeRouter  ──> RouteResult.success(routeWithShortcuts)
+      └── PedestrianRouter ──> RouteResult.failure("Exceeds walking distance")
+   (HUD handles all router implementations without type checks or crashes!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 3:
    - Any router implementation (`CarNavigationRouter`, `MotorcycleRouter`, `PedestrianRouter`)
      is 100% substitutable for `NavigationRouter`.

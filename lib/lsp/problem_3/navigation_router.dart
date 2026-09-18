@@ -11,6 +11,14 @@ Feature: Turn-by-Turn Navigation Routing Engines
    turn-by-turn route from the driver's current location to the pickup point.
    The base class `NavigationRouter` defines the contract for calculating routes.
 
+   EXECUTION FLOW (UNPREDICTABLE SUBTYPE):
+   Turn-by-turn Navigation HUD
+           ↓
+   router.calculateRoute()
+      ├── CarRouter        ──> Returns route with turn maneuvers
+      └── PedestrianRouter ──> Throws UnsupportedError OR returns []
+                               └──> CRASH on route.turnDirections.first!
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    Both cars and walking couriers need turn-by-turn navigation. Putting them under
    a common `NavigationRouter` interface seems like natural polymorphism.

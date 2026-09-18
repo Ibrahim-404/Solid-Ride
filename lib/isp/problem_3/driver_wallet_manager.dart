@@ -11,6 +11,12 @@ Feature: Driver Wallet & Financial Management Operations
    transaction history, cash out funds to their bank, link new payment methods,
    and dispute ride deductions (e.g. refunding an unjustified passenger cancellation).
 
+   EXECUTION FLOW (MUTATING CAPABILITY LEAKAGE):
+   [DriverWalletManager] (Balance Query + Instant Cashout + Link Bank Account)
+         ▲
+         └── DriverHeaderBalanceWidget (Display ONLY)
+               (Security risk: simple UI display can trigger cashouts!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    "It's all driver wallet functionality." A single `DriverWalletManager` interface
    containing all wallet queries and mutations seems logical to group together.

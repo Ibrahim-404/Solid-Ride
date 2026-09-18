@@ -12,6 +12,18 @@ Feature: Driver Earnings Payout & Cashout Gateways
    Mobile Wallet (STC Pay / Vodafone Cash). The `PayoutProcessor` checks the selected
    method via a `switch` statement, computes the method's fee, and sends the transfer.
 
+   EXECUTION FLOW (RIGID SWITCH):
+   Driver requests cashout
+           ↓
+   [PayoutProcessor]
+           ↓
+      switch (method) {
+         case Bank:   ──> [Hardcoded Bank Logic]
+         case Card:   ──> [Hardcoded Card Logic]
+         case Wallet: ──> [Hardcoded Wallet Logic]
+      }
+   (Adding InstaPay = Modifying & risking all existing payout methods!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    The code is clean, easy to read sequentially, and uses a standard Dart `enum`.
    For 2 or 3 payment options, a switch statement feels simple and direct.

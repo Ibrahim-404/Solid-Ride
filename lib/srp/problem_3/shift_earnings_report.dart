@@ -13,6 +13,16 @@ Feature: Shift Earnings Report & Driver Statement Generation
    localized date stamps, generates a CSV export string, and sends an email/SMS receipt
    to the driver's registered phone number.
 
+   EXECUTION FLOW (MONOLITHIC):
+   Driver finishes shift
+           ↓
+   [ShiftEarningsReporter] (One Class)
+      ├── 1. Accounting: Deducts commission & sums tips
+      ├── 2. Localization: Formats currency (\$/EGP) & dates
+      ├── 3. Exporter: Formats raw CSV text
+      └── 4. Messenger: Sends email/SMS receipt
+   (Mixed concerns: accounting, UI formatting, exports, and messaging)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    It keeps everything related to "Shift Earnings Report" in a single class called
    `ShiftEarningsReporter`. It feels organized because the class name matches the feature.

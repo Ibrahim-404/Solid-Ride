@@ -12,6 +12,14 @@ Feature: Multi-Modal Driver Fleet & Passenger Accommodations
    a base class `Vehicle`. Before dispatching a passenger trip, the system locks
    the vehicle doors and pre-activates air conditioning for passenger comfort.
 
+   EXECUTION FLOW (BROKEN SUBSTITUTION):
+   Passenger Dispatch Coordinator
+           ↓
+   Loops through: List<Vehicle>
+      ├── Car  ──> vehicle.turnOnAirConditioning() ──> OK
+      └── Bike ──> vehicle.turnOnAirConditioning() ──> CRASH!
+   (Throws UnsupportedError: Subtype fails to honor base contract!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    "A bicycle is a vehicle, and a car is a vehicle." In natural language, making
    `BicycleDelivery` and `MotorcycleCourier` inherit from `Vehicle` feels intuitive

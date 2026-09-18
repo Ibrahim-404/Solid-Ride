@@ -14,6 +14,18 @@ Feature: Order / Trip Dispatch Matching Eligibility Rules (Refactored via Rules)
      `WeightCapacityRule`, `HighValueInsuranceRule`, and a newly added `LowEmissionZoneRule`.
    - `OrderMatchingPipeline`: A generic engine that loops through registered rules.
 
+   REFACTORED SPECIFICATION PIPELINE FLOW:
+   Incoming order offer
+           ↓
+   [OrderMatchingPipeline] (CLOSED for modification)
+           ↓ evaluates rule collection
+   [OrderMatchingRule] (OPEN for extension)
+         ▲
+         ├── [CashOnDeliveryRule]
+         ├── [RatingThresholdRule]
+         ├── [WeightCapacityRule]
+         └── [LowEmissionZoneRule] (Plug in new rules with ZERO engine changes!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 3:
    - Adding a new business rule (e.g. `LowEmissionZoneRule`) requires creating ONLY a new
      class implementing `OrderMatchingRule`.

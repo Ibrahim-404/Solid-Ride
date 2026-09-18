@@ -16,6 +16,16 @@ Feature: Trip Cancellation & Fee Evaluation Invariants (Refactored)
    - Subtypes like `GovSubsidizedCancellationPolicy` honor the contract by returning
      a disallowed result rather than crashing the thread.
 
+   REFACTORED SAFE RESULT FLOW:
+   Rider / Driver cancels trip
+           ↓
+   [SafeCancellationCoordinator]
+           ↓
+   policy.evaluateCancellation()
+      ├── StandardPolicy ──> CancellationResult.allowed(fee: \$5.00)
+      └── GovPromoPolicy ──> CancellationResult.denied(reason: "Contact Support")
+   (All subtypes preserve invariants and return safe, structured results!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 2:
    - Any subclass of `CancellationPolicy` can safely replace another without the caller
      needing `try/catch` or defensive type checks.

@@ -12,6 +12,18 @@ Feature: Driver Earnings Payout & Cashout Gateways (Refactored)
    and newly added InstaPay) is encapsulated in its own class implementing this interface.
    `PayoutService` now delegates directly to `PayoutGateway`.
 
+   REFACTORED POLYMORPHIC FLOW:
+   Driver requests cashout
+           ↓
+   [PayoutService] (CLOSED for modification)
+           ↓ delegates to
+   [PayoutGateway] (OPEN for extension)
+         ▲
+         ├── [BankTransferPayoutGateway]
+         ├── [InstantCardPayoutGateway]
+         ├── [MobileWalletPayoutGateway]
+         └── [InstaPayPayoutGateway] (Added with ZERO edits to existing code!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 1:
    - Adding a new payout channel (e.g. `InstaPayPayoutGateway`) requires creating exactly
      ONE new class.

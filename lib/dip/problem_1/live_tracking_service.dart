@@ -12,6 +12,13 @@ Feature: Live Trip Tracking & Geolocation Publisher
    in real-time to a cloud database so passengers and dispatchers can see the car
    moving live on their map.
 
+   EXECUTION FLOW (DIRECT SDK COUPLING):
+   [DriverLiveTrackingUseCase] (High-Level Business Logic)
+         │ (Directly instantiates concrete low-level SDKs)
+         ├── new GeolocatorDevicePlugin()
+         └── new FirebaseRealtimeDatabase()
+   (Cannot unit test without hardware & cloud server; locked to Firebase!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    The high-level use case `DriverLiveTrackingUseCase` instantiates `GeolocatorDevicePlugin`
    and `FirebaseRealtimeDatabase` directly inside its constructor. It is quick to write,

@@ -16,6 +16,17 @@ Feature: Driver Document Verification & Onboarding (Refactored)
    - `DriverProfileRepository`: Handles persisting verification flags to the database.
    - `DriverDocumentProcessor`: Orchestrates the flow in a clean, readable pipeline.
 
+   REFACTORED PIPELINE FLOW:
+   Driver uploads Document Photo
+           ↓
+   [DriverDocumentProcessor] (Pipeline Orchestrator)
+      ├── 1. [DocumentImageCompressor]     ──> WebP optimization
+      ├── 2. [DocumentOcrParser]           ──> OCR text extraction
+      ├── 3. [DocumentComplianceValidator] ──> Expiry rule checks
+      ├── 4. [DocumentCloudStorage]        ──> S3 / GCS upload
+      └── 5. [DriverProfileRepository]     ──> Updates database record
+   (Each collaborator is independently testable in pure Dart)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 2:
    - If legal minimum validity changes from 30 to 90 days, we edit `DocumentComplianceValidator`.
      There is zero risk of breaking S3 uploads or image compression.

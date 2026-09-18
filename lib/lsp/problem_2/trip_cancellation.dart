@@ -12,6 +12,16 @@ Feature: Trip Cancellation & Fee Evaluation Invariants
    dispatch are free, while later cancellations incur a flat fee (e.g. $5.00) to
    compensate the driver's fuel and time.
 
+   EXECUTION FLOW (CONTRACT VIOLATION):
+   Rider / Driver cancels trip
+           ↓
+   [CancellationCoordinator]
+           ↓
+   policy.calculateCancellationFee()
+      ├── StandardPolicy ──> Returns \$5.00
+      └── GovPromoPolicy ──> CRASH! Throws StateError
+   (Subtype strengthens preconditions & crashes callers unexpectedly!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    The base class `CancellationPolicy` provides a clean virtual method:
    `double calculateCancellationFee(TripOrder trip, int minutesElapsed)`.

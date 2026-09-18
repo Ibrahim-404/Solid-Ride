@@ -12,6 +12,18 @@ Feature: Vehicle Type Fare & Surge Calculation
    takes trip distance (km), duration (minutes), and surge multiplier, checks the
    vehicle type via conditional branching, and computes the gross trip fare.
 
+   EXECUTION FLOW (RIGID BRANCHING):
+   Calculate trip fare
+           ↓
+   [TripFareCalculator]
+           ↓
+      switch (vehicleCategory) {
+         case Economy:    ──> [Hardcoded Economy pricing]
+         case Comfort:    ──> [Hardcoded Comfort pricing]
+         case Motorcycle: ──> [Hardcoded Courier pricing]
+      }
+   (Adding Electric Scooter = Modifying the core calculator!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    Having all pricing rules visible in a single method seems convenient for comparing
    fares across different vehicle classes side-by-side.

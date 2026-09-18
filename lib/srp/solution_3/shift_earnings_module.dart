@@ -14,6 +14,16 @@ Feature: Shift Earnings Report & Driver Statement Generation (Refactored)
    - `EarningsReceiptSender`: Handles sending statements via external communication channels.
    - `GenerateShiftReportUseCase`: Orchestrates the flow cleanly.
 
+   REFACTORED CLEAN FLOW:
+   Driver finishes shift
+           ↓
+   [GenerateShiftReportUseCase]
+      ├── 1. [ShiftEarningsCalculator] ──> Pure financial arithmetic
+      ├── 2. [EarningsReportFormatter] ──> UI localization & formatting
+      ├── 3. [EarningsCsvExporter]     ──> Generates export file
+      └── 4. [EarningsReceiptSender]   ──> Dispatches email/SMS
+   (Each responsibility is isolated and independently testable)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 3:
    - Adding a government withholding tax or changing toll policies touches ONLY
      `ShiftEarningsCalculator`.

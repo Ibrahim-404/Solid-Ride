@@ -13,6 +13,16 @@ Feature: Order / Trip Dispatch Matching Eligibility Rules
    their driver rating is high enough, whether their vehicle can handle the order's
    package weight, and whether they have high-value parcel insurance.
 
+   EXECUTION FLOW (CHAINED IF-ELSE):
+   Incoming order offer
+           ↓
+   [OrderMatchingEngine]
+      ├── if (!driver.hasCash && order.isCash) return false;
+      ├── if (driver.rating < order.minRating) return false;
+      ├── if (order.weight > driver.maxWeight) return false;
+      └── if (order.isHighValue && !driver.insured) return false;
+   (Adding Low Emission Zone rule = Bloating engine method!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    It's a straightforward series of `if` statements. Any developer can read the
    eligibility criteria in order from top to bottom.

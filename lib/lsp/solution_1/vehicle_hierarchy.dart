@@ -17,6 +17,14 @@ Feature: Multi-Modal Driver Fleet & Passenger Accommodations (Refactored)
    - Dispatch coordinators that prepare passenger rides now explicitly depend on
      `PassengerVehicle`.
 
+   REFACTORED SUBSTITUTABLE FLOW:
+   Passenger Dispatch Coordinator
+           ↓
+   Accepts ONLY: List<PassengerVehicle>
+      ├── SedanCar  ──> car.turnOnClimateControl() ──> OK
+      └── LuxurySuv ──> car.turnOnClimateControl() ──> OK
+   (BicycleCourier inherits from CargoCourierVehicle; 100% type-safe, zero crashes!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 1:
    - Any subclass of `PassengerVehicle` (Sedan, Luxury SUV, Minivan) can be substituted
      freely without throwing `UnsupportedError`.

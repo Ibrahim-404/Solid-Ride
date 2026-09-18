@@ -14,6 +14,13 @@ Feature: Driver Active Trip Event Listeners & Callbacks (Refactored)
    - `RegulatedItemDeliveryListener`: Focused on age verification for controlled deliveries.
    - `TollExpenseListener`: Focused on toll booth payments.
 
+   REFACTORED SEGREGATED FLOW:
+   Role-Specific Segregated Interfaces:
+      ├── [PassengerRideListener]  ── implemented by ──> TaxiRideScreen
+      ├── [FoodDeliveryListener]   ── implemented by ──> FoodDeliveryWidget
+      └── [TollExpenseListener]    ── implemented by ──> TollPaymentCard
+   (Food delivery widget implements ONLY what it needs. Zero dummy stubs!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 1:
    - `FoodDeliveryTrackingWidget` implements ONLY `FoodDeliveryListener`.
    - Zero empty `{}` stubs. Zero `throw UnimplementedError()` hacks.

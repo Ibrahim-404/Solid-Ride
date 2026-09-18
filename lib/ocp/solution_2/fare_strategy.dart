@@ -15,6 +15,18 @@ Feature: Vehicle Type Fare & Surge Calculation (Refactored via Strategy)
    - `FareCalculationService`: Closed for modification, it simply executes whichever
      strategy is provided.
 
+   REFACTORED STRATEGY FLOW:
+   Calculate trip fare
+           ↓
+   [FareCalculationService] (CLOSED for modification)
+           ↓ executes
+   [VehicleFareStrategy] (OPEN for extension)
+         ▲
+         ├── [EconomyFareStrategy]
+         ├── [ComfortFareStrategy]
+         ├── [MotorcycleFareStrategy]
+         └── [ElectricScooterFareStrategy] (Added with ZERO edits!)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 2:
    - Adding a new vehicle tier (such as `ElectricScooterFareStrategy`) is done purely by
      creating a new class implementing `VehicleFareStrategy`.

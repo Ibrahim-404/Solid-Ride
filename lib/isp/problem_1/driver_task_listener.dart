@@ -12,6 +12,16 @@ Feature: Driver Active Trip Event Listeners & Callbacks
    passenger boarding, luggage loading, food pickup, age verification checks,
    toll fee payments, and customer signatures.
 
+   EXECUTION FLOW (FAT INTERFACE COUPLING):
+   [DriverTripEventListener] (FAT Interface: 7 methods)
+         ▲
+         ├── FoodDeliveryWidget (Only needs onFoodPickedUp & onSignature)
+         │     ├── onFoodPickedUp() ──────────> Uses this
+         │     ├── onPassengerBoarded() ──────> Forced dummy stub / error!
+         │     ├── onLuggageLoaded() ─────────> Forced dummy stub / error!
+         │     └── onTollPaid() ──────────────> Forced dummy stub!
+   (Adding onChildSeat() breaks all food delivery widgets across the app!)
+
 2. WHY IT LOOKS FINE AT FIRST GLANCE:
    It groups all driver trip event callbacks into one comprehensive interface:
    `DriverTripEventListener`. Having a single listener seems organized and convenient

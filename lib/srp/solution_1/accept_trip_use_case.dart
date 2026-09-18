@@ -15,6 +15,16 @@ Feature: Trip Dispatch & Driver Order Acceptance (Refactored)
    - `TripAlertService`: Responsible ONLY for physical device feedback (chime & vibration).
    - `AcceptTripUseCase`: A lightweight orchestrator that coordinates these steps.
 
+   REFACTORED CLEAN FLOW:
+   Driver presses "Accept"
+           ↓
+   [AcceptTripUseCase] (Orchestrator)
+      ├── 1. [TripPayoutCalculator] ──> Calculates net payout
+      ├── 2. [TripRepository]       ──> SQLite + Backend API
+      ├── 3. [TripAnalyticsTracker] ──> Emits analytics event
+      └── 4. [TripAlertService]     ──> Plays sound & haptics
+   (Each collaborator has exactly ONE reason to change)
+
 2. WHY THIS FIXES THE EXACT PROBLEM FROM PROBLEM 1:
    - If Finance changes commission formulas, we ONLY touch `TripPayoutCalculator`. Zero risk of
      breaking network requests or local database caching.
