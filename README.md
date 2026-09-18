@@ -34,9 +34,7 @@ flutter, dart, solid-principles, clean-architecture, software-design, learning-r
 5. [How to Use This Repo (Hands-On Interactive Challenge)](#-how-to-use-this-repo-hands-on-interactive-challenge)
 6. [Self-Audit Checklist: Common Mistakes You Might Still Be Making](#-self-audit-checklist-common-mistakes-you-might-still-be-making)
 7. [Why SOLID Matters Even More When Working with AI Coding Agents](#-why-solid-matters-even-more-when-working-with-ai-coding-agents)
-8. [Key Takeaways (LinkedIn Ready)](#-key-takeaways-linkedin-ready)
-9. [Visual Social Sharing Guide & Architecture Diagram Ideas](#-visual-social-sharing-guide--architecture-diagram-ideas)
-10. [About the Author](#-about-the-author)
+8. [About the Author](#-about-the-author)
 
 ---
 
@@ -225,29 +223,6 @@ Violating SOLID principles creates monolithic, highly coupled files that exceed 
 ### 💬 How to Prompt an AI Agent to Anticipate SOLID Before Writing Code
 Use this system prompt directive when working with AI coding agents:
 > *"Before writing any code, analyze whether the requested change requires modifying existing classes or if it can be added via extension. Ensure all high-level business logic depends strictly on abstract contracts, keep interfaces segregated to single client roles, and ensure no subclass strengthens preconditions or weakens postconditions."*
-
----
-
-## 🚀 Key Takeaways (LinkedIn Ready)
-
-* **S (Single Responsibility)**: A class should change for only one stakeholder. If your dispatch service touches DB schema, billing math, and audio chimes, you have three reasons to fail.
-* **O (Open/Closed)**: Extend functionality by adding new classes, not by hacking existing `switch` statements. If adding a payment method risks breaking bank transfers, your code is not closed for modification.
-* **L (Liskov Substitution)**: Inheritance is about behavioral contracts, not shared English nouns. If a bicycle courier crashes your passenger car fleet algorithm, your hierarchy is broken.
-* **I (Interface Segregation)**: Big interfaces create fragile code. A food delivery widget should never be forced to implement passenger luggage or highway toll callbacks.
-* **D (Dependency Inversion)**: High-level business rules must never depend on third-party SDKs. If you can't test your live tracking use case without real GPS hardware, your dependencies are upside down.
-
----
-
-## 🎨 Visual Social Sharing Guide & Architecture Diagram Ideas
-
-> **Note for LinkedIn / Technical Blogging**:
-> If you are sharing this project on LinkedIn, Twitter/X, or Medium, visual contrast is your highest-engagement asset:
->
-> 1. **Most striking principle to lead a post with: LSP (Pair 1 - The Bicycle Courier Trap)**.
->    - *Why*: Every developer immediately relates to the intuitive trap of `"A bicycle is a vehicle, so Bicycle extends Vehicle"`. Showing how calling `vehicle.turnOnAirConditioning()` crashes the passenger dispatch loop is a visual, funny, and educational "aha!" moment.
-> 2. **Suggested Post Visuals**:
->    - A side-by-side screenshot of `lib/lsp/problem_1/vehicle_fleet.dart` (showing the thrown exception) versus `lib/lsp/solution_1/vehicle_hierarchy.dart` (showing the clean `PassengerVehicle` hierarchy).
->    - An architecture flowchart contrasting the monolithic `TripAcceptanceService` (SRP Problem 1) with the decoupled Clean Architecture use case (SRP Solution 1).
 
 ---
 
